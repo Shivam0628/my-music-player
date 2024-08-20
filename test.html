@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Music Player</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-image: url('floralbackground.jpeg'); /* Add your floral background image here */
+            background-size: cover;
+            background-position: center;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .music-player {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            text-align: center;
+            width: 350px;
+            max-width: 100%;
+            position: relative;
+        }
+
+        .album-art {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .album-art img {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .track-info {
+            margin-top: 20px;
+        }
+
+        .track-info h2 {
+            margin: 15px 0 5px;
+            font-size: 1.5em;
+            font-weight: 500;
+        }
+
+        .track-info h3 {
+            margin: 0;
+            font-size: 1em;
+            font-weight: 400;
+            color: #bbb;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .controls button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 50%;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+
+        .controls button:active {
+            transform: scale(0.95);
+        }
+
+        .progress-container {
+            background-color: #444;
+            border-radius: 5px;
+            height: 8px;
+            margin: 20px 0;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            background-color: #007bff;
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .volume-control {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .volume-control label {
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            appearance: none;
+            background-color: #555;
+            border-radius: 5px;
+            height: 8px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            background-color: #007bff;
+            border-radius: 50%;
+            cursor: pointer;
+            height: 20px;
+            width: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="range"]:hover::-webkit-slider-thumb {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="music-player">
+        <div class="album-art">
+            <img id="album-art" src="album1.jpg" alt="Album Art">
+        </div>
+        <div class="track-info">
+            <h2 id="track-title">Track Title</h2>
+            <h3 id="track-artist">Artist Name</h3>
+        </div>
+        <audio id="audio-player" src=""></audio>
+        <div class="controls">
+            <button id="prev-btn">⏮️</button>
+            <button id="play-btn">▶️</button>
+            <button id="pause-btn" style="display:none;">⏸️</button>
+            <button id="next-btn">⏭️</button>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div class="volume-control">
+            <label for="volume">Volume</label>
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5">
+        </div>
+    </div>
+
+    <script>
+        const audioPlayer = document.getElementById('audio-player');
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const volumeControl = document.getElementById('volume');
+        const progressBar = document.getElementById('progress-bar');
+        const trackTitle = document.getElementById('track-title');
+        const trackArtist = document.getElementById('track-artist');
+        const albumArt = document.getElementById('album-art');
+
+        const tracks = [
+            {
+                title: 'Track 1',
+                artist: 'Artist 1',
+                file: 'track1.mp3',
+                art: 'album1.jpg'
+            },
+            {
+                title: 'Track 2',
+                artist: 'Artist 2',
+                file: 'track2.mp3',
+                art: 'album2.jpg'
+            },
+            {
+                title: 'Track 3',
+                artist: 'Artist 3',
+                file: 'track3.mp3',
+                art: 'album3.jpg'
+            }
+        ];
+
+        let currentTrackIndex = 0;
+
+        function loadTrack(index) {
+            const track = tracks[index];
+            audioPlayer.src = track.file;
+            trackTitle.textContent = track.title;
+            trackArtist.textContent = track.artist;
+            albumArt.src = track.art;
+
+            updateProgress();
+        }
+
+        function playTrack() {
+            audioPlayer.play();
+            playBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+        }
+
+        function pauseTrack() {
+            audioPlayer.pause();
+            playBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+        }
+
+        function prevTrack() {
+            currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+            loadTrack(currentTrackIndex);
+            playTrack();
+        }
+
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack(currentTrackIndex);
+            playTrack();
+        }
+
+        function updateProgress() {
+            if (audioPlayer.duration) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progressBar.style.width = progress + '%';
+            }
+        }
+
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+
+        playBtn.addEventListener('click', playTrack);
+        pauseBtn.addEventListener('click', pauseTrack);
+        prevBtn.addEventListener('click', prevTrack);
+        nextBtn.addEventListener('click', nextTrack);
+
+        volumeControl.addEventListener('input', (e) => {
+            audioPlayer.volume = e.target.value;
+        });
+
+        // Load initial track
+        loadTrack(currentTrackIndex);
+    </script>
+</body>
+</html>
